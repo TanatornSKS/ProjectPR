@@ -119,7 +119,7 @@ const CreatePR: React.FC = () => {
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
 
-      // ✅ เพิ่ม state แค่ครั้งเดียว หลัง DB success
+      // เพิ่ม state แค่ครั้งเดียว หลัง DB success
       setAdded(prev => [...prev, { ...row, lineItem, qty }]);
 
     } catch (err) {
@@ -184,9 +184,14 @@ const CreatePR: React.FC = () => {
     )
     : dataSource;
 
-  const handleDelete = async (lineItem: string) => {
- 
+  const reindexLimneItems = (item:AddedMaterial[]) => {
+    return item.map((item, index) => ({
+      ...item,
+    lineItem: ((index + 1) * 10).toString().padStart(5, "0")
+     }));
+  };
 
+  const handleDelete = async (lineItem: string) => {
     try {
       const res = await fetch(
         `http://localhost:3001/api/prtemp/${lineItem}`,
@@ -196,9 +201,10 @@ const CreatePR: React.FC = () => {
       const json = await res.json();
       if (!json.success) throw new Error("Delete failed");
 
-      setAdded(prev =>
-        prev.filter(item => item.lineItem !== lineItem)
-      );
+      setAdded(prev =>{
+             const filtered = prev.filter(item => item.lineItem !== lineItem);
+      return reindexLimneItems(filtered);
+    });
 
     } catch (err) {
       console.error(err);
