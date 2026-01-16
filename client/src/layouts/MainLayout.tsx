@@ -150,6 +150,16 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             <ul className="nav flex-column ms-3">
               <li className="nav-item">
                 <NavLink
+                  to="/ReportPR"
+                  className="nav-link text-white"
+                  onClick={onLinkClick}
+                >
+                  <i className="fas fa-plus-circle me-2"></i>
+                  ReportPR
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink
                   to="/createPR"
                   className="nav-link text-white"
                   onClick={onLinkClick}
@@ -175,13 +185,24 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         </li>
       </ul>
 
-      <hr className="border-white opacity-25" />
+      
+<div className="mt-auto">
+  <hr className="border-white opacity-25" />
+  <button className="btn btn-link text-white text-start p-0 w-100">
+    <i className="fas fa-sign-out-alt"></i>
+    {!collapsed && <span className="ms-2">ออกจากระบบ</span>}
+  </button>
 
-      <button className="btn btn-link text-white text-start p-0">
-        <i className="fas fa-sign-out-alt"></i>
-        {!collapsed && <span className="ms-2">ออกจากระบบ</span>}
-      </button>
+  <p
+    className="text-center text-white-50 mt-2 mb-0"
+    style={{ fontSize: "0.75rem" }}
+  >
+    2026 Version : Develop
+  </p>
+</div>
+      
     </div>
+    
   );
 };
 

@@ -64,3 +64,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--bs-warning) !important;
+  color: #000 !important;
+}

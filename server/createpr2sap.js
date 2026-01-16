@@ -2,7 +2,67 @@ const express = require("express");
 const axios = require("axios");
 const xml2js = require("xml2js");
 
+const fs = require("fs"); 
+const sql = require("mssql");
+const { error } = require("console");
+
+const connectionString = fs.readFileSync("connection.txt", "utf8").trim();
+
 const router = express.Router();
+
+async function moveTempToDB(prNumber, plant) {
+  const pool = await sql.connect(connectionString);
+  const transaction = new sql.Transaction(pool);
+
+  await transaction.begin();
+
+  try {
+    const request = new sql.Request(transaction);
+
+    // 1. INSERT temp → db พร้อม prNumber + timestamp
+    await request
+      .input("prNumber", sql.VarChar, prNumber)
+      .input("Plant", sql.VarChar, plant)
+      .query(`
+        INSERT INTO t_matpr_db
+        (
+          prNumber,
+          pr_date,
+          line_item,
+          Material,
+          Material_Description,
+          qty,
+          Base_Unit_of_Measure,
+          Plant,
+          Name_1
+        )
+        SELECT
+          @prNumber,
+          GETDATE(),
+          line_item,
+          Material,
+          Material_Description,
+          qty,
+          Base_Unit_of_Measure,
+          Plant,
+          Name_1
+        FROM t_matpr_temp
+        WHERE Plant = @Plant
+      `);
+
+    // 2. DELETE temp
+    await request.query(`
+      DELETE FROM t_matpr_temp
+      WHERE Plant = @Plant
+    `);
+
+    await transaction.commit();
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
+}
+
 
 router.post("/sap/createpr2sap", async (req, res) => {
   console.log("CREATE PR API CALLED");
@@ -11,7 +71,7 @@ router.post("/sap/createpr2sap", async (req, res) => {
 
   if (!items || items.length === 0) {
     return res.status(400).json({
-      success: false,
+      error: false,
       message: "No PR items"
     });
   }
@@ -89,6 +149,10 @@ router.post("/sap/createpr2sap", async (req, res) => {
         rawSapResponse: response.data
       });
     }
+
+    const plant = items[0].Plant; // assume PR เดียวต่อ 1 plant
+
+await moveTempToDB(prNumber, plant);
 
     return res.json({
       success: true,
