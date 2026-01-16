@@ -13,15 +13,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="d-flex min-vh-100 w-100">
-      {/* ================= Mobile Hamburger ================= */}
-      <button
-        className="btn btn-danger position-fixed top-0 start-0 m-2 d-md-none"
-        style={{ zIndex: 1200 }}
-        onClick={() => setShowOffcanvas(true)}
-      >
-        <i className="fas fa-bars"></i>
-      </button>
-
       {/* ================= Sidebar Desktop ================= */}
       <aside
         className="d-none d-md-flex flex-column bg-danger text-white shadow-lg"
@@ -39,24 +30,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* ================= Offcanvas Mobile ================= */}
       {showOffcanvas && (
-        <div
-          className="position-fixed top-0 start-0 h-100 bg-danger text-white shadow-lg"
-          style={{ width: 220, zIndex: 1300 }}
-        >
-          <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
-            <h5 className="mb-0">projectPR</h5>
-            <button
-              className="btn-close btn-close-white"
-              onClick={() => setShowOffcanvas(false)}
+        <>
+          {/* backdrop */}
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"
+            style={{ zIndex: 1290 }}
+            onClick={() => setShowOffcanvas(false)}
+          />
+
+          <div
+            className="position-fixed top-0 start-0 h-100 bg-danger text-white shadow-lg"
+            style={{ width: 220, zIndex: 1300 }}
+          >
+            <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+              <h5 className="mb-0">projectPR</h5>
+              <button
+                className="btn-close btn-close-white"
+                onClick={() => setShowOffcanvas(false)}
+              />
+            </div>
+
+            <SidebarContent
+              openPR={openPR}
+              setOpenPR={setOpenPR}
+              onLinkClick={() => setShowOffcanvas(false)}
             />
           </div>
-
-          <SidebarContent
-            openPR={openPR}
-            setOpenPR={setOpenPR}
-            onLinkClick={() => setShowOffcanvas(false)}
-          />
-        </div>
+        </>
       )}
 
       {/* ================= Main ================= */}
@@ -64,6 +64,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* -------- Navbar -------- */}
         <nav className="navbar navbar-light bg-light shadow-sm">
           <div className="container-fluid">
+            {/* Mobile Hamburger */}
+            <button
+              className="btn btn-outline-danger d-md-none"
+              onClick={() => setShowOffcanvas(true)}
+            >
+              <i className="fas fa-bars"></i>
+            </button>
+
+            {/* Desktop Collapse */}
             <button
               className="btn btn-outline-danger d-none d-md-inline"
               onClick={() => setCollapsed(!collapsed)}
@@ -150,22 +159,23 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             <ul className="nav flex-column ms-3">
               <li className="nav-item">
                 <NavLink
-                  to="/ReportPR"
-                  className="nav-link text-white"
-                  onClick={onLinkClick}
-                >
-                  <i className="fa-regular fa-file me-2"></i>
-                  ReportPR
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
                   to="/createPR"
                   className="nav-link text-white"
                   onClick={onLinkClick}
                 >
                   <i className="fas fa-plus-circle me-2"></i>
                   Create PR
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/HistoryPR"
+                  className="nav-link text-white"
+                  onClick={onLinkClick}
+                >
+                 <i className="fa-solid fa-clock-rotate-left me-2"></i>
+                  History PR
                 </NavLink>
               </li>
             </ul>
@@ -185,7 +195,6 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         </li>
       </ul>
 
-
       <div className="mt-auto">
         <hr className="border-white opacity-25" />
         <button className="btn btn-link text-white text-start p-0 w-100">
@@ -200,9 +209,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
           2026 Version : Develop
         </p>
       </div>
-
     </div>
-
   );
 };
 

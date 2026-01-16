@@ -3,7 +3,7 @@ import MainLayout from "./layouts/MainLayout";
 
 import Home from "./pages/Home";
 import CreatePR from "./pages/CreatePR";
-import ReportPR from "./pages/ReportPR";
+import HistoryPR from "./pages/HistoryPR";
 function App() {
   return (
     <BrowserRouter>
@@ -12,7 +12,7 @@ function App() {
 
           <Route path="/" element={<Home />} />
           <Route path="/createPR" element={<CreatePR />} />
-          <Route path="/reportPR" element={<ReportPR />} />
+          <Route path="/HistoryPR" element={<HistoryPR />} />
 
 
          

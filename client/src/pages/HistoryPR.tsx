@@ -63,8 +63,7 @@ const ReportPR: React.FC = () => {
     }
   }, [page, searchKey]);
 
-  /* ===== GROUP BY PR ===== */
-  /* ===== GROUP + SORT BY PR_DATE DESC ===== */
+
   const groupedArray = Object.values(
     data.reduce<Record<string, PRItem[]>>((acc, row) => {
       acc[row.prNumber] = acc[row.prNumber] || [];
