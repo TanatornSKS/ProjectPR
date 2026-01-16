@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 interface Material {
@@ -52,31 +52,31 @@ const CreatePR: React.FC = () => {
   }, []);
 
   useEffect(() => {
-  const fetchPRTemp = async () => {
-    try {
-      const res = await fetch(
-        "http://localhost:3001/api/prtemp?plant=1021"
-      );
-      const data = await res.json();
+    const fetchPRTemp = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:3001/api/prtemp?plant=1021"
+        );
+        const data = await res.json();
 
-      const mapped = data.map((row: any) => ({
-        lineItem: row.line_item,
-        Material: row.Material,
-        Material_Description: row.Material_Description,
-        qty: row.qty,
-        Base_Unit_of_Measure: row.Base_Unit_of_Measure,
-        Plant: row.Plant,
-        Name_1: row.Name_1
-      }));
+        const mapped = data.map((row: any) => ({
+          lineItem: row.line_item,
+          Material: row.Material,
+          Material_Description: row.Material_Description,
+          qty: row.qty,
+          Base_Unit_of_Measure: row.Base_Unit_of_Measure,
+          Plant: row.Plant,
+          Name_1: row.Name_1
+        }));
 
-      setAdded(mapped);
-    } catch (err) {
-      console.error("Load PR temp failed", err);
-    }
-  };
+        setAdded(mapped);
+      } catch (err) {
+        console.error("Load PR temp failed", err);
+      }
+    };
 
-  fetchPRTemp();
-}, []);
+    fetchPRTemp();
+  }, []);
 
 
 
@@ -94,39 +94,39 @@ const CreatePR: React.FC = () => {
 
   const handleAdd = async (row: Material) => {
     console.log("ADD CLICK", row.Material)
-  if (added.find(a => a.Material === row.Material)) return;
+    if (added.find(a => a.Material === row.Material)) return;
 
-  const qty = searchQty[row.Material] ?? 1;
-  const lineItem = generateLineItem();
-console.log("CALL API /prtemp");
-  try {
-    const res = await fetch("http://localhost:3001/api/prtemp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        lineItem,
-        material: row.Material,
-        Material_Description: row.Material_Description,
-        qty,
-        Base_Unit_of_Measure: row.Base_Unit_of_Measure,
-        Plant: row.Plant,
-        Name_1: row.Name_1
-      })
-    });
+    const qty = searchQty[row.Material] ?? 1;
+    const lineItem = generateLineItem();
+    console.log("CALL API /prtemp");
+    try {
+      const res = await fetch("http://localhost:3001/api/prtemp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          lineItem,
+          material: row.Material,
+          Material_Description: row.Material_Description,
+          qty,
+          Base_Unit_of_Measure: row.Base_Unit_of_Measure,
+          Plant: row.Plant,
+          Name_1: row.Name_1
+        })
+      });
 
-    const json = await res.json();
-    if (!json.success) throw new Error(json.message);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
 
-    // ✅ เพิ่ม state แค่ครั้งเดียว หลัง DB success
-    setAdded(prev => [...prev, { ...row, lineItem, qty }]);
+      // ✅ เพิ่ม state แค่ครั้งเดียว หลัง DB success
+      setAdded(prev => [...prev, { ...row, lineItem, qty }]);
 
-  } catch (err) {
-    console.error(err);
-    alert("Add material failed");
-  }
-};
+    } catch (err) {
+      console.error(err);
+      alert("Add material failed");
+    }
+  };
 
   const handleQtyChange = (index: number, value: number) => {
     setAdded(prev =>
@@ -182,9 +182,30 @@ console.log("CALL API /prtemp");
         val.toString().toLowerCase().includes(search.toLowerCase())
       )
     )
-    : [];
+    : dataSource;
 
-  /* ---------- Render ---------- */
+  const handleDelete = async (lineItem: string) => {
+ 
+
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/prtemp/${lineItem}`,
+        { method: "DELETE" }
+      );
+
+      const json = await res.json();
+      if (!json.success) throw new Error("Delete failed");
+
+      setAdded(prev =>
+        prev.filter(item => item.lineItem !== lineItem)
+      );
+
+    } catch (err) {
+      console.error(err);
+      alert("Delete item failed");
+    }
+  };
+
   return (
     <div className="w-100">
       {resultMesge && (
@@ -290,43 +311,65 @@ console.log("CALL API /prtemp");
                     </div>
                   </div>
 
-
-                  <table className="table table-striped table-sm">
-                    <thead className="table-dark">
-                      <tr>
-                        <th style={{ width: 90, textAlign: "center" }}>Line Item</th>
-                        <th style={{ width: 140 }}>Material</th>
-                        <th>Description</th>
-                        <th style={{ width: 100, textAlign: "center" }}>QTY</th>
-                        <th style={{ width: 80, textAlign: "center" }}>Unit</th>
-                        <th style={{ width: 80, textAlign: "center" }}>Plant</th>
-                        <th style={{ width: 200 }}>Plant name</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {added.map((row, idx) => (
-                        <tr key={idx}>
-                          <td style={{ textAlign: "center" }}>{row.lineItem}</td>
-                          <td>{row.Material}</td>
-                          <td>{row.Material_Description}</td>
-                          <td>
-                            <input style={{ textAlign: "center" }}
-                              type="number"
-                              min={1}
-                              className="form-control form-control-sm"
-                              value={row.qty}
-                              onChange={e =>
-                                handleQtyChange(idx, Number(e.target.value))
-                              }
-                            />
-                          </td>
-                          <td style={{ textAlign: "center" }}>{row.Base_Unit_of_Measure}</td>
-                          <td style={{ textAlign: "center" }}>{row.Plant}</td>
-                          <td>{row.Name_1}</td>
+                  <div className="table-responsive">
+                    <table className="table table-striped table-sm align-middle">
+                      <thead className="table-dark">
+                        <tr>
+                          <th className="text-center text-nowrap" style={{ width: 60 }}>Line</th>
+                          <th className="text-nowrap">Material</th>
+                          <th>Description</th>
+                          <th className="text-center text-nowrap" style={{ width: 70 }}>Qty</th>
+                          <th className="text-center text-nowrap" style={{ width: 60 }}>Unit</th>
+                          <th className="d-none d-md-table-cell text-center">Plant</th>
+                          <th className="d-none d-md-table-cell">Plant Name</th>
+                          <th style={{ width: 32 }}></th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody>
+                        {added.map((row, idx) => (
+                          <tr key={idx}>
+                            <td className="text-center">{row.lineItem}</td>
+
+                            <td className="text-nowrap">{row.Material}</td>
+
+                            <td className="text-truncate" style={{ maxWidth: 200 }}>
+                              {row.Material_Description}
+                            </td>
+
+                            <td className="text-center">
+                              <input
+                                type="number"
+                                min={1}
+                                className="form-control form-control-sm text-center"
+                                style={{ maxWidth: 60 }}
+                                value={row.qty}
+                                onChange={e => handleQtyChange(idx, Number(e.target.value))}
+                              />
+                            </td>
+
+                            <td className="text-center">{row.Base_Unit_of_Measure}</td>
+
+                            <td className="d-none d-md-table-cell text-center">{row.Plant}</td>
+
+                            <td className="d-none d-md-table-cell text-truncate" style={{ maxWidth: 160 }}>
+                              {row.Name_1}
+                            </td>
+
+                            <td className="text-center">
+                              <button
+                                className="btn btn-outline-danger btn-sm px-2"
+                                onClick={() => handleDelete(row.lineItem)}
+                              >
+                                ✕
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
                   <div className="d-flex justify-content-end mt-3">
                     <button
                       className="btn btn-danger px-4"

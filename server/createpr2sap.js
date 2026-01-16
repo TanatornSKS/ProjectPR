@@ -161,7 +161,7 @@ await moveTempToDB(prNumber, plant);
     });
 
   } catch (err) {
-    console.error("❌ SAP ERROR:", err.message);
+    console.error("SAP ERROR:", err.message);
 
     if (err.response?.data) {
       console.error("SAP FAULT XML:\n", err.response.data);
@@ -182,6 +182,28 @@ await moveTempToDB(prNumber, plant);
     return res.status(500).json({
       success: false,
       message: err.message
+    });
+  }
+});
+
+router.delete("/prtemp/:lineItem", async (req, res) => {
+  const { lineItem } = req.params;  
+  try{
+    const pool = await sql.connect(connectionString); 
+
+    await pool.request()
+      .input("line_item", sql.VarChar, lineItem)
+      .query(`
+        DELETE FROM t_matpr_temp
+        WHERE line_item = @line_item
+      `); 
+      res.json({ success: true });
+
+  } catch (err) {
+    console.error("Delete prtemp error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Delete failed"
     });
   }
 });
